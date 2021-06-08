@@ -322,14 +322,18 @@ namespace OctopartXll
             if ((offers != null) && (offers.Count > 0))
             {
                 // ---- BEGIN Function Specific Information ----
-                int stock = offers.Max(offer => offer.in_stock_quantity);
-                switch (stock)
+                offers = offers.FindAll(offer => GetDistributors(distributors).Contains(offer.seller.name));
+                if ((offers != null) && (offers.Count > 0))
                 {
-                    case -1: return "Non-stocked";
-                    case -2: return "Yes";
-                    case -3: return "Unknown";
-                    case -4: return "RFQ";
-                    default: return stock;
+                    int stock = offers.Max(offer => offer.in_stock_quantity);
+                    switch (stock)
+                    {
+                        case -1: return "Non-stocked";
+                        case -2: return "Yes";
+                        case -3: return "Unknown";
+                        case -4: return "RFQ";
+                        default: return stock;
+                    }
                 }
                 // ---- END Function Specific Information ----
             }
@@ -350,6 +354,16 @@ namespace OctopartXll
                     }
 
                     // ---- BEGIN Function Specific Information ----
+                    offers = offers.FindAll(offer => GetDistributors(distributors).Contains(offer.seller.name)); 
+                    if ((offers == null) || (offers.Count == 0))
+                    {
+                        string err = QueryManager.GetLastError(mpn_or_sku);
+                        if (string.IsNullOrEmpty(err))
+                            err = "Query did not provide a result. Please widen your search criteria.";
+
+                        return "ERROR: " + err;
+                    }
+
                     int stock = offers.Max(offer => offer.in_stock_quantity);
                     switch (stock)
                     {
